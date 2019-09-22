@@ -11,11 +11,8 @@
   when: not file.stat.exists
 
 - name: set permission
-  file:
-    path: "{{ item.path }}"
-    state: "{{ item.state }}"
-    mode: "{{ item.mode }}"
+  shell: "{{ item }}"
   with_items:
-    - { path: "/var/www/src", state: "directory", mode: "750" }
-    - { path: "/var/www/src/storage", state: "directory", mode: "770" }
-    - { path: "/var/www/src/bootstrap/cache", state: "directory", mode: "770" }
+    - chmod 755 -R /var/www/src
+    - chmod 777 -R /var/www/src/storage
+    - chmod 777 -R /var/www/src/bootstrap/cache
