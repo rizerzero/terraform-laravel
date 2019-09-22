@@ -1,0 +1,21 @@
+---
+
+- name: check file
+  stat:
+    path: /var/www/src/public/index.php
+  register: file
+
+- name: install laravel
+  shell: |
+    composer create-project --prefer-dist laravel/laravel /var/www/src
+  when: not file.stat.exists
+
+- name: set permission
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { path: "/var/www/src", state: "directory", mode: "750" }
+    - { path: "/var/www/src/storage", state: "directory", mode: "770" }
+    - { path: "/var/www/src/bootstrap/cache", state: "directory", mode: "770" }
