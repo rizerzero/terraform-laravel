@@ -24,11 +24,70 @@ resource "aws_subnet" "public" {
   }
 }
 
+// Gateway
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.default.id
+  tags = {
+    Name = "test"
+  }
+}
+
+// Route Table
+resource "aws_route_table" "route" {
+  vpc_id = aws_vpc.default.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+}
+
+// association between subnet and table
+resource "aws_route_table_association" "public" {
+  subnet_id = aws_subnet.public.id
+  route_table_id = aws_route_table.route.id
+}
+
+// security group
+resource "aws_security_group" "web" {
+  vpc_id = aws_vpc.default.id
+  tags = {
+    Name = "test"
+  }
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_instance" "web" {
   ami = "ami-0c3fd0f5d33134a76"
   instance_type = "t3.micro"
   subnet_id = aws_subnet.public.id
+  vpc_security_group_ids = [
+    aws_security_group.web.id
+  ]
   tags = {
     Name = "test"
   }
+}
+
+resource "aws_eip" "eip" {
+  instance = aws_instance.web.id
+  vpc = true
+}
+
+output "ec2_dns" {
+  value = aws_eip.eip.public_dns
+}
+
+output "ec2_ip" {
+  value = aws_eip.eip.public_ip
 }
