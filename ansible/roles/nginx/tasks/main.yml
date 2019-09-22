@@ -1,0 +1,24 @@
+- name:
+  user:
+    name: nginx
+
+- name: add repo
+  template:
+    src: nginx.repo
+    dest: /etc/yum.repos.d/nginx.repo
+
+- name: install nginx
+  yum:
+    name: nginx-1.17.1
+    enablerepo: nginx-mainline
+
+- name: add nginx.conf
+  template:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+
+- name: start nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
