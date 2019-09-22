@@ -59,6 +59,12 @@ resource "aws_security_group" "web" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     from_port = 0
     to_port = 0
@@ -67,10 +73,17 @@ resource "aws_security_group" "web" {
   }
 }
 
+// upload public key
+resource "aws_key_pair" "key" {
+  key_name = "test2"
+  public_key = file("~/.ssh/laravel.pub")
+}
+
 resource "aws_instance" "web" {
   ami = "ami-0c3fd0f5d33134a76"
   instance_type = "t3.micro"
   subnet_id = aws_subnet.public.id
+  key_name = "test2"
   vpc_security_group_ids = [
     aws_security_group.web.id
   ]
